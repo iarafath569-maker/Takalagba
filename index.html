@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Earn Ads App</title>
+<title>Earn Money App</title>
 
 <style>
 
@@ -10,67 +10,112 @@ body{
 background:#0f172a;
 font-family:Arial;
 color:white;
-text-align:center;
-padding:40px;
+margin:0;
+padding:0;
+display:flex;
+justify-content:center;
+}
+
+.container{
+max-width:500px;
+width:100%;
+padding:20px;
 }
 
 .card{
 background:#1e293b;
-padding:30px;
+padding:20px;
 border-radius:10px;
-max-width:400px;
-margin:auto;
+margin-bottom:15px;
+text-align:center;
+}
+
+h1{
+text-align:center;
 }
 
 button{
-padding:10px 20px;
-margin:8px;
+padding:12px;
+margin:6px;
 border:none;
 background:#3b82f6;
 color:white;
 border-radius:6px;
 cursor:pointer;
+width:90%;
+font-size:16px;
+}
+
+button:hover{
+background:#2563eb;
 }
 
 input{
-padding:8px;
+padding:10px;
 margin:5px;
-width:80%;
+width:90%;
+border-radius:6px;
+border:none;
+}
+
+.balance{
+font-size:22px;
+color:#22c55e;
+}
+
+.nav{
+display:flex;
+justify-content:space-around;
+margin-top:10px;
+}
+
+.nav button{
+width:30%;
+background:#334155;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<div class="card">
+<div class="container">
 
-<h2>Earn Ads App</h2>
+<h1>Earn Money App</h1>
+
+<div class="card">
 
 <p>User ID: <span id="uid"></span></p>
 
-<p>Balance: <span id="balance">0</span> টাকা</p>
+<p class="balance">Balance: <span id="balance">0</span> টাকা</p>
 
 <p>Ads Watched: <span id="ads">0</span></p>
 
+<p>Videos Watched: <span id="videos">0</span></p>
+
+</div>
+
+<div class="card">
+
 <button onclick="watchAd()">Watch Ad (2 টাকা)</button>
 
-<br>
+<button onclick="watchVideo()">Watch Video (3 টাকা)</button>
 
 <button onclick="copyRef()">Copy Referral Link</button>
 
-<br><br>
+</div>
+
+<div class="card">
 
 <h3>Withdraw</h3>
 
 <input id="amount" placeholder="Amount">
 
-<input id="phone" placeholder="Bkash Number">
-
-<br>
+<input id="phone" placeholder="Bkash / Nagad Number">
 
 <button onclick="withdraw()">Withdraw</button>
+
+</div>
 
 </div>
 
@@ -82,17 +127,17 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
 
-apiKey: "YOUR_API_KEY",
+apiKey:"YOUR_API_KEY",
 
-authDomain: "YOUR_PROJECT.firebaseapp.com",
+authDomain:"YOUR_PROJECT.firebaseapp.com",
 
-projectId: "YOUR_PROJECT_ID",
+projectId:"YOUR_PROJECT_ID",
 
-storageBucket: "YOUR_PROJECT.appspot.com",
+storageBucket:"YOUR_PROJECT.appspot.com",
 
-messagingSenderId: "XXXX",
+messagingSenderId:"XXXX",
 
-appId: "XXXX"
+appId:"XXXX"
 
 };
 
@@ -126,6 +171,8 @@ balance:0,
 
 ads:0,
 
+videos:0,
+
 referrals:0
 
 });
@@ -142,29 +189,27 @@ const snap = await getDoc(userRef);
 
 let data = snap.data();
 
-document.getElementById("balance").innerText = data.balance;
+document.getElementById("balance").innerText=data.balance;
 
-document.getElementById("ads").innerText = data.ads;
+document.getElementById("ads").innerText=data.ads;
+
+document.getElementById("videos").innerText=data.videos;
 
 }
 
 window.watchAd = async function(){
 
+alert("Ad playing...");
+
 let snap = await getDoc(userRef);
 
 let data = snap.data();
 
-let balance = data.balance + 2;
+let balance=data.balance+2;
 
-let ads = data.ads + 1;
+let ads=data.ads+1;
 
-await updateDoc(userRef,{
-
-balance:balance,
-
-ads:ads
-
-});
+await updateDoc(userRef,{balance:balance,ads:ads});
 
 loadUser();
 
@@ -172,9 +217,33 @@ alert("2 টাকা যোগ হয়েছে");
 
 }
 
-window.copyRef = function(){
+window.watchVideo = async function(){
 
-let link = window.location.href+"?ref="+uid;
+alert("Video watching...");
+
+setTimeout(async ()=>{
+
+let snap = await getDoc(userRef);
+
+let data = snap.data();
+
+let balance=data.balance+3;
+
+let videos=data.videos+1;
+
+await updateDoc(userRef,{balance:balance,videos:videos});
+
+loadUser();
+
+alert("3 টাকা যোগ হয়েছে");
+
+},5000)
+
+}
+
+window.copyRef=function(){
+
+let link=window.location.href+"?ref="+uid;
 
 navigator.clipboard.writeText(link);
 
@@ -184,11 +253,11 @@ alert("Referral link copied");
 
 window.withdraw = async function(){
 
-let amount = document.getElementById("amount").value;
+let amount=document.getElementById("amount").value;
 
-let phone = document.getElementById("phone").value;
+let phone=document.getElementById("phone").value;
 
-if(amount < 20){
+if(amount<20){
 
 alert("Minimum withdraw 20 টাকা");
 
