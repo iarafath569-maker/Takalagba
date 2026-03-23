@@ -2,44 +2,132 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Earn App</title>
+<title>Earn Ads App</title>
+
+<style>
+
+body{
+background:#0f172a;
+font-family:Arial;
+color:white;
+text-align:center;
+padding:40px;
+}
+
+.card{
+background:#1e293b;
+padding:30px;
+border-radius:10px;
+max-width:400px;
+margin:auto;
+}
+
+button{
+padding:10px 20px;
+margin:8px;
+border:none;
+background:#3b82f6;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+input{
+padding:8px;
+margin:5px;
+width:80%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>Earn Ads App</h2>
+
+<p>User ID: <span id="uid"></span></p>
+
+<p>Balance: <span id="balance">0</span> টাকা</p>
+
+<p>Ads Watched: <span id="ads">0</span></p>
+
+<button onclick="watchAd()">Watch Ad (2 টাকা)</button>
+
+<br>
+
+<button onclick="copyRef()">Copy Referral Link</button>
+
+<br><br>
+
+<h3>Withdraw</h3>
+
+<input id="amount" placeholder="Amount">
+
+<input id="phone" placeholder="Bkash Number">
+
+<br>
+
+<button onclick="withdraw()">Withdraw</button>
+
+</div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, addDoc, collection } 
+import { getFirestore, doc, setDoc, getDoc, updateDoc, addDoc, collection }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
+
 apiKey: "YOUR_API_KEY",
+
 authDomain: "YOUR_PROJECT.firebaseapp.com",
+
 projectId: "YOUR_PROJECT_ID",
+
 storageBucket: "YOUR_PROJECT.appspot.com",
+
 messagingSenderId: "XXXX",
+
 appId: "XXXX"
+
 };
 
 const app = initializeApp(firebaseConfig);
+
 const db = getFirestore(app);
 
-let userId = localStorage.getItem("userId");
+let uid = localStorage.getItem("uid");
 
-if(!userId){
-userId = Math.floor(Math.random()*1000000).toString();
-localStorage.setItem("userId",userId);
+if(!uid){
+
+uid = Math.floor(Math.random()*1000000).toString();
+
+localStorage.setItem("uid",uid);
+
 }
 
-const userRef = doc(db,"users",userId);
+document.getElementById("uid").innerText = uid;
 
-async function initUser(){
+const userRef = doc(db,"users",uid);
+
+async function init(){
 
 const snap = await getDoc(userRef);
 
 if(!snap.exists()){
 
 await setDoc(userRef,{
+
 balance:0,
-ads:0
+
+ads:0,
+
+referrals:0
+
 });
 
 }
@@ -52,44 +140,73 @@ async function loadUser(){
 
 const snap = await getDoc(userRef);
 
-const data = snap.data();
+let data = snap.data();
 
-document.getElementById("balance").innerText=data.balance;
-document.getElementById("ads").innerText=data.ads;
+document.getElementById("balance").innerText = data.balance;
+
+document.getElementById("ads").innerText = data.ads;
 
 }
 
 window.watchAd = async function(){
 
 let snap = await getDoc(userRef);
+
 let data = snap.data();
 
-let newBalance = data.balance + 2;
-let newAds = data.ads + 1;
+let balance = data.balance + 2;
+
+let ads = data.ads + 1;
 
 await updateDoc(userRef,{
-balance:newBalance,
-ads:newAds
+
+balance:balance,
+
+ads:ads
+
 });
 
-document.getElementById("balance").innerText=newBalance;
-document.getElementById("ads").innerText=newAds;
+loadUser();
 
 alert("2 টাকা যোগ হয়েছে");
 
 }
 
+window.copyRef = function(){
+
+let link = window.location.href+"?ref="+uid;
+
+navigator.clipboard.writeText(link);
+
+alert("Referral link copied");
+
+}
+
 window.withdraw = async function(){
 
-let amount = prompt("Withdraw amount");
-let phone = prompt("Bkash number");
+let amount = document.getElementById("amount").value;
+
+let phone = document.getElementById("phone").value;
+
+if(amount < 20){
+
+alert("Minimum withdraw 20 টাকা");
+
+return;
+
+}
 
 await addDoc(collection(db,"withdraw"),{
 
-user:userId,
+user:uid,
+
 amount:amount,
+
 phone:phone,
-status:"pending"
+
+status:"pending",
+
+time:Date.now()
 
 });
 
@@ -97,53 +214,9 @@ alert("Withdraw request sent");
 
 }
 
-initUser();
+init();
 
 </script>
-
-<style>
-
-body{
-font-family:sans-serif;
-background:#0f172a;
-color:white;
-text-align:center;
-}
-
-.card{
-background:#1e293b;
-padding:20px;
-margin:20px;
-border-radius:10px;
-}
-
-button{
-padding:10px 20px;
-border:none;
-background:#3b82f6;
-color:white;
-border-radius:6px;
-margin:5px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h2>Earn App</h2>
-
-<div class="card">
-
-<p>Balance: <span id="balance">0</span> টাকা</p>
-<p>Ads watched: <span id="ads">0</span></p>
-
-<button onclick="watchAd()">Watch Ad</button>
-
-<button onclick="withdraw()">Withdraw</button>
-
-</div>
 
 </body>
 </html>
